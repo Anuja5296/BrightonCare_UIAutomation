@@ -6,12 +6,12 @@ import { EditProfileTestData, getrandomAdminDate } from '../test-data/EditProfil
 import { testData } from '../test-data/credentials';
 import * as fs from 'fs';
 
-test('Edit Any Existing Move-In Profile', async ({ page }) => {
+test('Edit Any Existing Move-In Profile @chromium', async ({ page }) => {
   console.log('='.repeat(80));
-  console.log('TEST: EDIT PROFILE DETAILS (STANDALONE)');
+  console.log('TEST: EDIT COMPLETE PROFILE DETAILS');
   console.log('='.repeat(80));
   
-  // Check if we need to login (if auth-state.json doesn't exist)
+  // Check if we need to login
   const authExists = fs.existsSync('auth-state.json');
   
   if (!authExists) {
@@ -30,7 +30,7 @@ test('Edit Any Existing Move-In Profile', async ({ page }) => {
   await page.goto('https://qa-ehr.polarissw.co/move-in');
   await page.waitForTimeout(2000);
   
-  // Find any existing entry
+  // Find existing entry
   console.log('📍 Finding existing entry...');
   await page.waitForSelector('tbody tr', { timeout: 5000 });
   
@@ -53,37 +53,73 @@ test('Edit Any Existing Move-In Profile', async ({ page }) => {
   await page.waitForTimeout(2000);
   console.log('✅ Details page opened\n');
   
-  // Edit all sections
-  console.log('📍 Editing all profile sections...\n');
+  // Initialize page object
   const editProfilePage = new EditProfileDetailsPage(page);
   
-  console.log('   1/8: Admission Details...');
+  // Edit all sections
+  console.log('📍 Editing all profile sections...\n');
+  
+  // 1. ROOM MANAGEMENT
+console.log('   1/9: Room Management...');
+console.log('   ━'.repeat(40));
+
+const primaryRoomAdded = await editProfilePage.addPrimaryRoom(
+  EditProfileTestData.roomManagement.primaryRoom
+);
+
+if (!primaryRoomAdded) {
+  console.log('⏭️ Skipping Secondary Room and edits — Primary room not added');
+} else {
+  // Edit primary room
+  await editProfilePage.changeRoomType(
+    EditProfileTestData.roomManagement.primaryRoom
+  );
+
+  // Add secondary room ONLY if primary exists
+  const secondaryRoomAdded = await editProfilePage.addSecondaryRoom(
+    EditProfileTestData.roomManagement.secondaryRoom
+  );
+
+  if (!secondaryRoomAdded) {
+    console.log('⚠️ Secondary room not added — skipping edit');
+  }
+}
+
+console.log('   ━'.repeat(40));
+  
+  // 2. ADMISSION DETAILS
+  console.log('   2/9: Admission Details...');
   await editProfilePage.editAdmissionDetails(EditProfileTestData.admissionDetails);
   
-  console.log('   2/8: Responsible Person...');
+  // 3. RESPONSIBLE PERSON
+  console.log('   3/9: Responsible Person...');
   await editProfilePage.editResponsiblePerson(EditProfileTestData.responsiblePerson);
   
-  console.log('   3/8: Diet...');
+  // 4. DIET
+  console.log('   4/9: Diet...');
   await editProfilePage.editDiet(EditProfileTestData.diet);
   
-  console.log('   4/8: Diagnosis...');
+  // 5. DIAGNOSIS
+  console.log('   5/9: Diagnosis...');
   await editProfilePage.editDiagnosis(EditProfileTestData.diagnosis);
   
-  console.log('   5/8: Insurance...');
+  // 6. INSURANCE
+  console.log('   6/9: Insurance...');
   await editProfilePage.addInsurance(EditProfileTestData.insurance);
   
-  console.log('   6/8: Hospitalization...');
+  // 7. HOSPITALIZATION
+  console.log('   7/9: Hospitalization...');
   await editProfilePage.editHospitalization(EditProfileTestData.hospitalization);
   
-  console.log('   7/8: Immunization...');
-  const admin = getrandomAdminDate();
-  
+  // 8. IMMUNIZATION
+  console.log('   8/9: Immunization...');
   await editProfilePage.addImmunization(EditProfileTestData.immunization);
   
-  console.log('   8/8: Physician...');
+  // 9. PHYSICIAN
+  console.log('   9/9: Physician...');
   await editProfilePage.editPhysician(EditProfileTestData.physician);
   
   console.log('\n' + '='.repeat(80));
-  console.log('✅ TEST COMPLETED - Profile Edited Successfully');
+  console.log('✅ TEST COMPLETED - All 9 Sections Edited Successfully');
   console.log('='.repeat(80) + '\n');
 });

@@ -1,18 +1,32 @@
 // pages/EditProfileDetailsPage.ts
-import { Page, Locator } from '@playwright/test';
+import { Page, Locator, expect } from '@playwright/test';
 
 export class EditProfileDetailsPage {
   readonly page: Page;
 
   // Admission Details Section
   readonly editAdmissionDetailsButton: Locator;
-  readonly desiredCommunityDropdown: Locator;
+  // readonly desiredCommunityDropdown: Locator;
   readonly asapCheckbox: Locator;
   readonly chooseDateButton: Locator;
+  readonly calendarGrid: Locator;  // ADD THIS LINE
   readonly admissionTypeDropdown: Locator;
   readonly respiteSwitch: Locator;
   readonly hospiceSwitch: Locator;
   readonly summaryNotesTextbox: Locator;
+
+  //Room section
+   readonly addRoomButton: Locator;
+  readonly roomTypeToggle: Locator;
+  readonly roomNumberDropdown: Locator;
+  readonly roomStartDateButton: Locator;
+  readonly roomEndDateButton: Locator;
+  readonly addAdditionalRoomButton: Locator;
+  readonly secondResidentToggle: Locator;
+  readonly occupancyTypeDropdown: Locator;
+  readonly editRoomButton: Locator;
+  readonly noOptionFoundText: Locator;
+  // readonly secondaryRoomEditBtn: Locator;
 
   // Responsible Person Section
   readonly editResponsiblePersonButton: Locator;
@@ -88,13 +102,28 @@ export class EditProfileDetailsPage {
 
     // Admission Details
     this.editAdmissionDetailsButton = page.getByRole('button', { name: 'Edit' }).first();
-    this.desiredCommunityDropdown = page.getByRole('combobox', { name: 'Desired Community*' });
-    this.asapCheckbox = page.getByText('As Soon as possible');
-    this.chooseDateButton = page.locator('div').filter({ hasText: /^Choose Date$/ }).nth(1);
+   
+ // this.desiredCommunityDropdown = page.getByRole('combobox', { name: 'Desired Community*' });
+    this.asapCheckbox = page.getByRole('checkbox', { name: 'As Soon as possible' });
+    this.chooseDateButton = page.locator('dialog button:has-text("Choose Date")').nth(1);
+    this.calendarGrid = page.locator('[role="grid"]'); 
     this.admissionTypeDropdown = page.getByRole('combobox', { name: 'Admission Type*' });
+    this.hospiceSwitch = page.getByRole('switch', { name: 'Hospice' });
     this.respiteSwitch = page.getByRole('switch', { name: 'Respite' });
-    this.hospiceSwitch = page.locator('div').filter({ hasText: /^Hospice$/ }).nth(2);
     this.summaryNotesTextbox = page.getByRole('textbox', { name: 'Summary Notes' });
+
+    // Room Management
+    this.addRoomButton = page.getByRole('button', { name: 'Add Room' });
+    this.roomTypeToggle = page.getByText('Shared');
+    this.roomNumberDropdown = page.getByRole('combobox').first();
+    this.roomStartDateButton = page.getByRole('button', { name: 'Choose Date' }).first();
+    this.roomEndDateButton = page.getByRole('button', { name: 'Choose Date' }).last();
+    this.addAdditionalRoomButton = page.getByRole('button', { name: 'Add Additional' });
+    this.secondResidentToggle = page.getByText('2nd Resident');
+    this.occupancyTypeDropdown = page.locator('div').filter({ hasText: 'Occupancy Type*' });
+    this.editRoomButton = page.getByRole('button', { name: 'Edit' }).first();
+    this.noOptionFoundText = page.getByText('No option found');
+    // this.secondaryRoomEditBtn=  page.getByRole('button', { name: 'Edit' }).first();
 
     // Responsible Person
     this.editResponsiblePersonButton = page.getByRole('button', { name: 'Edit' }).nth(3);
@@ -169,19 +198,49 @@ export class EditProfileDetailsPage {
   }
 
   // ========== ADMISSION DETAILS ==========
-  async editAdmissionDetails(data: any) {
-    console.log('📝 Editing Admission Details...');
-    await this.editAdmissionDetailsButton.click();
-    await this.page.waitForTimeout(500);
+  // ========== ADMISSION DETAILS ==========
+async editAdmissionDetails(data: any) {
+  console.log('📝 Editing Admission Details...');
+  await this.editAdmissionDetailsButton.click();
+  await this.page.waitForTimeout(500);
 
-    if (data.desiredCommunity) {
-      await this.desiredCommunityDropdown.click();
-      await this.page.getByLabel(data.desiredCommunity).getByText(data.desiredCommunity).click();
-    }
+  // if (data.desiredCommunity) {
+  //   await this.desiredCommunityDropdown.click();
+  //   await this.page
+  //     .getByLabel(data.desiredCommunity)
+  //     .getByText(data.desiredCommunity)
+  //     .click();
+  // 
 
-    if (data.asap) {
-      await this.asapCheckbox.click();
-    }
+  // ===== ASAP & Move-In Date logic (EDIT FLOW) =====
+  await this.asapCheckbox.waitFor({ state: 'visible' });
+
+const isAsapChecked = await this.asapCheckbox.isChecked();
+
+if (!isAsapChecked) {
+  // ASAP NOT selected → select it and STOP
+  console.log('☑️ ASAP not selected — selecting ASAP, skipping date selection');
+  await this.asapCheckbox.click();
+  
+} else {
+  // ASAP already selected → deselect & select current date
+  console.log('⬜ ASAP already selected — deselecting and selecting current date');
+
+  await this.asapCheckbox.click(); // deselect ASAP
+  await this.chooseDateButton.waitFor({ state: 'visible', timeout: 10000 });
+
+  await this.chooseDateButton.click();
+
+  await this.calendarGrid.waitFor({ state: 'visible' });
+
+  const today = new Date().getDate();
+  await this.calendarGrid
+    .getByRole('button', { name: String(today), exact: true })
+    .click();
+
+  console.log(`📅 Selected current date: ${today}`);
+}
+
 
     if (data.respite) {
       await this.respiteSwitch.click();
@@ -460,7 +519,6 @@ export class EditProfileDetailsPage {
     await this.notesTextarea.click();
     await this.notesTextarea.fill("Automation notes for physician.");
 
-
     await this.saveButton.click();
     await this.page.waitForTimeout(1000);
     console.log('✅ Physician saved');
@@ -518,5 +576,197 @@ async selectRandomProfession() {
   await options.nth(randomIndex).click();
 }
 
-    
+  // ========== ROOM MANAGEMENT ==========
+  
+  private async selectDate(dateString: string) {
+    await this.page.getByRole('button', { name: dateString }).click();
+    await this.page.waitForTimeout(300);
+  }
+
+private async selectRoom(): Promise<boolean> {
+  console.log('🏠 Selecting available room across occupancy types...');
+
+  const occupancyRadios = this.page.getByRole('radio');
+  const roomDropdown = this.roomNumberDropdown;
+  const noOptionText = this.noOptionFoundText;
+
+  const occupancyCount = await occupancyRadios.count();
+  console.log(`🔍 Found ${occupancyCount} occupancy types`);
+
+  for (let i = 0; i < occupancyCount; i++) {
+    const radio = occupancyRadios.nth(i);
+
+    if (!(await radio.isVisible().catch(() => false))) continue;
+
+    const label = (await radio.textContent())?.trim();
+    console.log(`🔄 Trying occupancy type: ${label}`);
+
+    // Select occupancy type
+    await radio.click();
+    await this.page.waitForTimeout(500);
+
+    // Open room dropdown
+    await roomDropdown.click();
+    await this.page.waitForTimeout(800);
+
+    // Check "No options found"
+    const noOptions = await noOptionText.isVisible().catch(() => false);
+    if (noOptions) {
+      console.log(`⚠️ No rooms available for ${label}`);
+      await this.page.keyboard.press('Escape');
+      continue;
+    }
+
+    // Fetch available rooms
+    const options = this.page.locator('[role="option"]');
+    const optionCount = await options.count();
+
+    if (optionCount > 0) {
+      const randomIndex = Math.floor(Math.random() * optionCount);
+      const selectedRoom = await options.nth(randomIndex).textContent();
+
+      console.log(`✅ Selected room: ${selectedRoom?.trim()}`);
+      await options.nth(randomIndex).click();
+      return true;
+    }
+
+    // Safety escape before next iteration
+    await this.page.keyboard.press('Escape');
+  }
+
+  console.log('❌ No rooms available in any occupancy type — cancelling');
+  await this.cancelButton.click();
+  return false;
 }
+
+  async addPrimaryRoom(data: any): Promise<boolean> {
+    console.log('📝 Adding Primary Room...');
+    try {
+      await this.addRoomButton.click();
+      await this.page.waitForTimeout(500);
+      
+      if (!await this.selectRoom()) return false;
+      
+      await this.roomStartDateButton.click();
+      await this.selectDate(data.startDate);
+      
+      await this.saveButton.click();
+      await this.page.waitForTimeout(1000);
+      console.log('✅ Primary Room added\n');
+      return true;
+    } catch (error) {
+      console.log('❌ Error:', error);
+      await this.cancelButton.click();
+      return false;
+    }
+  }
+
+async changeRoomType(data: any): Promise<boolean> {
+  console.log('📝 Editing Primary Room...');
+
+  await this.page.getByText('Primary', { exact: true }).first().click();
+  await this.page.waitForTimeout(1500);
+
+  if (!await this.selectRoom()) return false;
+
+  await this.roomStartDateButton.click();
+  await this.selectDate(data.startDate);
+
+  await this.saveButton.click();
+  await this.page.waitForTimeout(1500);
+
+  console.log('✅ Primary room updated\n');
+  return true;
+}
+
+
+async addSecondaryRoom(data: any): Promise<boolean> {
+  console.log('📝 Adding Secondary Room...');
+
+  await this.addAdditionalRoomButton.click();
+  await this.page.waitForTimeout(1000);
+
+  if (!await this.selectRoom()) return false;
+
+  await this.roomStartDateButton.click();
+  await this.selectDate(data.startDate);
+
+  await this.roomEndDateButton.click();
+  await this.selectDate(data.endDate);
+
+  await this.saveButton.click();
+  await this.page.waitForTimeout(1500);
+
+  console.log('✅ Secondary Room added\n');
+  return true;
+}
+
+ async editSecondaryRoom(data: any): Promise<boolean> {
+  console.log('✏️ Editing Secondary Room...');
+
+  // 🔹 Find Secondary room card using badge text
+  const secondaryRoomCard = this.page.locator('div', {
+    has: this.page.getByText('Secondary', { exact: true }),
+  }).first();
+
+  await secondaryRoomCard.waitFor({ state: 'visible', timeout: 10000 });
+
+  // 🔹 Click Edit inside Secondary card
+  const editBtn = secondaryRoomCard.getByRole('button', { name: 'Edit' });
+  await editBtn.click();
+
+  // 🔹 Ensure drawer opened
+  await this.page
+    .getByText(/Add Secondary Room|Edit Secondary Room/i)
+    .waitFor({ state: 'visible', timeout: 5000 });
+
+  // 🔹 Select room across occupancy types
+  const roomSelected = await this.selectRoom();
+  if (!roomSelected) {
+    console.log('⚠️ No room available for Secondary edit');
+    return false;
+  }
+
+  // 🔹 Update dates if needed
+  if (data?.startDate) {
+    await this.roomStartDateButton.click();
+    await this.selectDate(data.startDate);
+  }
+
+  if (data?.endDate) {
+    await this.roomEndDateButton.click();
+    await this.selectDate(data.endDate);
+  }
+
+  // 🔹 Save
+  await this.saveButton.click();
+  await this.page.waitForTimeout(1500);
+
+  console.log('✅ Secondary room updated successfully\n');
+  return true;
+}
+
+
+private async selectCurrentDate() {
+  // Open date picker
+  await this.chooseDateButton.click();
+  await this.page.waitForTimeout(300);
+
+  // Get today's day number
+  const today = new Date();
+  const day = today.getDate();
+
+  // Click the button corresponding to today's date
+  await this.page.getByRole('button', { name: String(day) }).click();
+  await this.page.waitForTimeout(300);
+
+  console.log(`✅ Selected current date: ${day}`);
+}
+
+}
+
+
+
+
+
+    

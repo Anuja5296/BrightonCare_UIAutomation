@@ -2,6 +2,16 @@
 
 import { title } from "process";
 
+export function getDateString(daysFromNow: number = 0): string {
+  const date = new Date();
+  date.setDate(date.getDate() + daysFromNow);
+  const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  const ordinal = (n: number) => ['st','nd','rd'][((n+90)%100-10)%10-1] || 'th';
+  return `${days[date.getDay()]}, ${months[date.getMonth()]} ${date.getDate()}${ordinal(date.getDate())},`;
+}
+
+
 export function getrandomAdminDate(startYear = 1950, endYear = 2020) {
   const start = new Date(startYear, 0, 1).getTime();
   const end = new Date(endYear, 11, 31).getTime();
@@ -36,16 +46,23 @@ export const randomAdminDate = getrandomAdminDate();
 export const EditProfileTestData = {
 
   
-
-
-  
   admissionDetails: {
-    desiredCommunity: 'La Posada Senior Living',
+    // desiredCommunity: 'La Posada Senior Living',
     asap: true,
     respite: true,
     admissionType: 'Memory Care',
     hospice: true,
     summaryNotes: 'Testing admission details'
+  },
+
+   roomManagement: {
+    primaryRoom: {
+      startDate: getDateString(0) // Today
+    },
+    secondaryRoom: {
+      startDate: getDateString(0), // Today
+      endDate: getDateString(1) // Tomorrow
+    }
   },
 
   responsiblePerson: {
@@ -96,7 +113,7 @@ export const EditProfileTestData = {
     administeredDate: 'June 15th, 2022',
     adminYear: getrandomAdminDate().dobYear,
     adminMMonth: getrandomAdminDate().dobMonth,
-    administeredBy: 'Anuja Satpute',
+    administeredBy: 'Anuja Thinkitive',
     site: 'left top',
     manufacturer: 'Johnson & Johnson (Janssen)',
     lotNumber: '345678765'

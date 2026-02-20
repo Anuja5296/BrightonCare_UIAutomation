@@ -50,7 +50,7 @@ export class IncidentPage {
     this.submitCommentButton = page.getByRole('button', { name: 'Submit' });
     this.canvas = page.locator('canvas');
     this.firstAidNoRadio = page.locator('label[for="firstAid-false"]');
-    this.transportedNoRadio = page.locator('label[for="transported-false"]');
+    this.transportedNoRadio = page.locator('label[for="transported-false"]:has-text("No")');
     this.fileInput = page.locator('input[type="file"]');
   }
 
@@ -74,10 +74,10 @@ export class IncidentPage {
     }
   }
 
-  async selectIncidentDate(dateButtonText: string, dayButtonText: string): Promise<void> {
-    await this.page.getByRole('button', { name: dateButtonText }).click();
-    await this.page.getByRole('button', { name: dayButtonText }).click();
-  }
+  // async selectIncidentDate(dateButtonText: string, dayButtonText: string): Promise<void> {
+  //   await this.page.getByRole('button', { name: dateButtonText }).click();
+  //   await this.page.getByRole('button', { name: dayButtonText }).click();
+  // }
 
   async fillLocation(location: string): Promise<void> {
     await this.locationInput.click();

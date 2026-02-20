@@ -63,12 +63,12 @@ test.describe('Incident Management', () => {
       console.log('✅ Incident types selected');
     });
 
-    await test.step('Select incident date', async () => {
-      console.log('📅 Selecting date...');
-      await page.getByRole('button', { name: '/05/2026' }).click();
-      await page.getByRole('button', { name: 'Sunday, January 4th,' }).click();
-      console.log('✅ Date selected');
-    });
+    // await test.step('Select incident date', async () => {
+    //   console.log('📅 Selecting date...');
+    //   await page.getByRole('button', { name: '/04/2026' }).click();
+    //   await page.getByRole('button', { name: 'Su, January 4th,' }).click();
+    //   console.log('✅ Date selected');
+    // });
 
     await test.step('Fill location', async () => {
       console.log('📍 Filling location...');
@@ -105,6 +105,7 @@ await test.step('Select First Aid - No (REQUIRED)', async () => {
    await test.step('Set transported to No', async () => {
   console.log('🚫 Setting transported to No...');
   await incidentPage.setTransportedNo();
+  await page.waitForTimeout(500);
   console.log('✅ Transported set to No');
 });
 

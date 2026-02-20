@@ -34,7 +34,7 @@ export class AddMoveInPage {
     rpZipCodeInput = () => this.page.locator('input[name="responsiblePersons[0].zipCode"]');
     
     // Admission Details Locators
-    desiredCommunityDropdown = () => this.page.getByRole('combobox', { name: 'Desired Community*' });
+    // desiredCommunityDropdown = () => this.page.getByRole('combobox', { name: 'Desired Community*' });
     moveInDateButton = () => this.page.getByRole('button', { name: 'Choose Date' });
     
     // Buttons
@@ -140,13 +140,13 @@ export class AddMoveInPage {
         await this.page.getByRole('option', { name: stateName }).click();
     }
 
-    // Select Desired Community
-    async selectDesiredCommunity(communityName: string) {
-        console.log(`🔽 Selecting Community: ${communityName}`);
-        await this.desiredCommunityDropdown().click();
-        await this.page.waitForTimeout(300);
-        await this.page.getByRole('option', { name: communityName }).click();
-    }
+    // // Select Desired Community
+    // async selectDesiredCommunity(communityName: string) {
+    //     console.log(`🔽 Selecting Community: ${communityName}`);
+    //     await this.desiredCommunityDropdown().click();
+    //     await this.page.waitForTimeout(300);
+    //     await this.page.getByRole('option', { name: communityName }).click();
+    // }
 
     // Select Move-in Date (current or future)
     async selectMoveInDate(daysFromToday: number = 0) {
@@ -250,7 +250,7 @@ export class AddMoveInPage {
         
         console.log('📝 Filling Admission Details...');
         
-        await this.selectDesiredCommunity(data.desiredCommunity);
+        // await this.selectDesiredCommunity(data.desiredCommunity);
         await this.selectMoveInDate(data.daysFromToday || 0);
         
         console.log('✅ Form filled completely');

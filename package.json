@@ -2,18 +2,23 @@
   "name": "brightoncareautomation",
   "version": "1.0.0",
   "main": "index.js",
-  "scripts": {},
+  "scripts": {
+    "test": "npx playwright test --reporter=html",
+    "send-report": "ts-node sendReport.ts"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "@playwright/test": "^1.56.1",
-    "@types/node": "^24.10.0"
+    "@types/node": "^24.10.0",
+    "@types/nodemailer": "^7.0.4"
   },
   "directories": {
     "test": "tests"
   },
   "dependencies": {
+    "nodemailer": "^7.0.12",
     "playwright": "^1.56.1",
     "playwright-core": "^1.56.1",
     "typescript": "^5.9.3",

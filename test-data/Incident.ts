@@ -1,7 +1,7 @@
 export interface IncidentData {
   description: string;
-  dateButton: string;
-  dayButton: string;
+  // dateButton: string;
+  // dayButton: string;
   location: string;
   injuries: string;
   witnessName: string;
@@ -14,8 +14,8 @@ export interface IncidentData {
 
 export const incidentTestData: IncidentData = {
   description: 'Fall in bathroom',
-  dateButton: '/05/2026',
-  dayButton: 'Sunday, January 4th,',
+  // dateButton: '/04/2026',
+  // dayButton: 'Su, January 4th,',
   location: 'Bathroom',
   injuries: 'Leg fracture',
   witnessName: 'Anuja',

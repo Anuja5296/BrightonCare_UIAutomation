@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
-    "target": "ESNext",
-    "module": "commonjs",
+    "target": "ES202",
+    "module": "ESNext",
     "moduleResolution": "node",
     "sourceMap": true,
     "outDir": "./dist",

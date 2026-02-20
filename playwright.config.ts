@@ -13,6 +13,8 @@ import { defineConfig, devices } from '@playwright/test';
  *
  */
 
+
+
 import * as fs from 'fs';
 
 // Check if auth file exists
@@ -45,12 +47,15 @@ testMatch: [
   'tests/2-EditProfileDetails.spec.ts',
   'tests/3-notes.spec.ts',
   'tests/4-incident.spec.ts',
+  'tests/5-vitals.spec.ts'
 ],
 
   reporter: [
     ['html'],
     ['list']
   ],
+
+  
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('')`. */
@@ -67,8 +72,12 @@ testMatch: [
     // Only use storageState if file exists
     ...(useAuth && { storageState: authFile }),
     viewport: { width: 1900, height: 1080 }, 
+
+
+    
   },
 
+  
   /* Configure projects for major browsers */
   projects: [
     {
